@@ -10,10 +10,11 @@
 
 #import "MessagePackParser.h"
 
+
 @implementation NSData (NSData_MessagePack)
 
--(id)messagePackParse {
-	return [MessagePackParser parseData:self];
+- (id)messagePackParse {
+  return [MessagePackParser parseData:self];
 }
 
 @end

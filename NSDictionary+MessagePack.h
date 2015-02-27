@@ -8,10 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
+
 // Adds MessagePack packing to NSDictionary
 @interface NSDictionary (NSDictionary_MessagePack)
 
 // Packs the receiver's data into message pack data
-- (NSData*)messagePack;
+- (NSData *)messagePack;
 
 @end

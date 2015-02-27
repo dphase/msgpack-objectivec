@@ -9,11 +9,12 @@
 #import <Foundation/Foundation.h>
 #import "MessagePackParser.h"
 
+
 @interface MessagePackParser (Streaming)
 
 - (id)init;
 - (id)initWithBufferSize:(int)bufferSize;
-- (void)feed:(NSData*)rawData;
+- (void)feed:(NSData *)rawData;
 - (id)next;
 
 @end

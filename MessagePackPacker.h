@@ -8,9 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+
 @interface MessagePackPacker : NSObject
 
 // Given an array or dictionary, this messagepacks it
-+ (NSData*)pack:(id)obj;
++ (NSData *)pack:(id)obj;
 
 @end

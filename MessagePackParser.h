@@ -9,11 +9,12 @@
 #import <Foundation/Foundation.h>
 #include <msgpack.h>
 
+
 @interface MessagePackParser : NSObject {
-    // This is only for MessagePackParser+Streaming category.
-    msgpack_unpacker unpacker;
+  // This is only for MessagePackParser+Streaming category.
+  msgpack_unpacker unpacker;
 }
 
-+ (id)parseData:(NSData*)data;
++ (id)parseData:(NSData *)data;
 
 @end
