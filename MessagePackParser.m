@@ -22,12 +22,15 @@
         case MSGPACK_OBJECT_NEGATIVE_INTEGER:
             return [[NSNumber alloc] initWithLongLong:obj.via.i64];
             break;
-        case MSGPACK_OBJECT_DOUBLE:
-            return [[NSNumber alloc] initWithDouble:obj.via.dec];
+        case MSGPACK_OBJECT_FLOAT:
+            return [[NSNumber alloc] initWithDouble:obj.via.f64];
             break;
-        case MSGPACK_OBJECT_RAW:
-            return [[NSString alloc] initWithBytes:obj.via.raw.ptr length:obj.via.raw.size encoding:NSUTF8StringEncoding];
+        case MSGPACK_OBJECT_STR:
+            return [[NSString alloc] initWithBytes:obj.via.str.ptr length:obj.via.str.size encoding:NSUTF8StringEncoding];
             break;
+        case MSGPACK_OBJECT_BIN:
+          return [[NSData alloc] initWithBytes:obj.via.bin.ptr length:obj.via.bin.size];
+          break;
         case MSGPACK_OBJECT_ARRAY:
         {
             NSMutableArray *arr = [[NSMutableArray alloc] initWithCapacity:obj.via.array.size];
@@ -72,11 +75,7 @@
 	bool success = msgpack_unpack_next(&msg, data.bytes, data.length, NULL); // Parse it into C-land
 	id results = success ? [self createUnpackedObject:msg.data] : nil; // Convert from C-land to Obj-c-land
 	msgpack_unpacked_destroy(&msg); // Free the parser
-#if !__has_feature(objc_arc)
-	return [results autorelease];
-#else
     return results;
-#endif
 }
 
 @end

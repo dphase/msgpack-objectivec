@@ -7,16 +7,16 @@
 //
 
 #import "MessagePackPacker.h"
-#include "msgpack_src/msgpack.h"
+#include <msgpack.h>
 
 @implementation MessagePackPacker
 
 // Pack a single number, figuring out which type of number it is
 + (void)packNumber:(NSNumber*)num into:(msgpack_packer*)pk {
-	CFNumberType numberType = CFNumberGetType((CFNumberRef)num);
+	CFNumberType numberType = CFNumberGetType((__bridge CFNumberRef)num);
 	switch (numberType)	{
 		case kCFNumberSInt8Type:
-			msgpack_pack_int8(pk, num.shortValue);
+			msgpack_pack_int8(pk, (int8_t) num.shortValue);
 			break;
 		case kCFNumberSInt16Type:
 		case kCFNumberShortType:
@@ -49,7 +49,7 @@
 			else if (theValue == 1)
 				msgpack_pack_true(pk);
 			else
-				msgpack_pack_int16(pk, theValue);
+				msgpack_pack_int16(pk, (int16_t) theValue);
 		}
 			break;
 		default:
@@ -72,9 +72,14 @@
 		}
 	} else if ([obj isKindOfClass:[NSString class]]) {
 		const char *str = ((NSString*)obj).UTF8String;
-		int len = strlen(str);
-		msgpack_pack_raw(pk, len);
-		msgpack_pack_raw_body(pk, str, len);
+		int len = (int) strlen(str);
+		msgpack_pack_str(pk, (size_t) len);
+		msgpack_pack_str_body(pk, str, (size_t) len);
+  } else if ([obj isKindOfClass:[NSData class]]) {
+    const char *str = [obj bytes];
+    int len = [obj length];
+    msgpack_pack_bin(pk, (size_t) len);
+    msgpack_pack_bin_body(pk, str, (size_t) len);
 	} else if ([obj isKindOfClass:[NSNumber class]]) {
 		[self packNumber:obj into:pk];
 	} else if (obj==[NSNull null]) {
