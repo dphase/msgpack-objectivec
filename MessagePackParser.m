@@ -11,9 +11,7 @@
 #import "MessagePackExtType.h"
 
 
-@implementation MessagePackParser
-
-+ (id)createUnpackedObject:(msgpack_object)obj {
+static id unpacked_object(msgpack_object obj, MessagePackExtTypeHandler ext_type_handler) {
   switch (obj.type) {
     case MSGPACK_OBJECT_BOOLEAN:
       return [[NSNumber alloc] initWithBool:obj.via.boolean];
@@ -31,7 +29,7 @@
       NSMutableArray *arr = [[NSMutableArray alloc] initWithCapacity:obj.via.array.size];
       msgpack_object *const pend = obj.via.array.ptr + obj.via.array.size;
       for (msgpack_object *p = obj.via.array.ptr; p < pend; p++) {
-        id newArrayItem = [self createUnpackedObject:*p];
+        id newArrayItem = unpacked_object(*p, ext_type_handler);
         [arr addObject:newArrayItem];
       }
       return arr;
@@ -40,17 +38,21 @@
       NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:obj.via.map.size];
       msgpack_object_kv *const pend = obj.via.map.ptr + obj.via.map.size;
       for (msgpack_object_kv *p = obj.via.map.ptr; p < pend; p++) {
-        id key = [self createUnpackedObject:p->key];
-        id val = [self createUnpackedObject:p->val];
+        id key = unpacked_object(p->key, ext_type_handler);
+        id val = unpacked_object(p->val, ext_type_handler);
         dict[key] = val;
       }
       return dict;
     }
     case MSGPACK_OBJECT_EXT: {
-      MessagePackExtType *ext = [[MessagePackExtType alloc] init];
-      ext.type = (NSUInteger) obj.via.ext.type;
-      ext.data = [[NSData alloc] initWithBytes:obj.via.ext.ptr length:obj.via.ext.size];
-      return ext;
+      if (ext_type_handler == nil) {
+        MessagePackExtType *ext = [[MessagePackExtType alloc] init];
+        ext.type = (NSUInteger) obj.via.ext.type;
+        ext.data = [[NSData alloc] initWithBytes:obj.via.ext.ptr length:obj.via.ext.size];
+        return ext;
+      } else {
+        return ext_type_handler(obj.via.ext.type, obj.via.ext.ptr, obj.via.ext.size);
+      }
     }
     case MSGPACK_OBJECT_NIL:
     default:
@@ -58,13 +60,19 @@
   }
 }
 
+@implementation MessagePackParser
+
 // Parse the given messagepack data into a NSDictionary or NSArray typically
 + (id)parseData:(NSData *)data {
+  return [self parseData:data withExtTypeHandler:nil];
+}
+
++ (id)parseData:(NSData *)data withExtTypeHandler:(MessagePackExtTypeHandler)handler {
   msgpack_unpacked msg;
   msgpack_unpacked_init(&msg);
 
-  bool success = msgpack_unpack_next(&msg, data.bytes, data.length, NULL); // Parse it into C-land
-  id results = success ? [self createUnpackedObject:msg.data] : nil; // Convert from C-land to Obj-c-land
+  BOOL success = msgpack_unpack_next(&msg, data.bytes, data.length, NULL);
+  id results = success ? unpacked_object(msg.data, handler) : nil;
 
   msgpack_unpacked_destroy(&msg); // Free the parser
 
