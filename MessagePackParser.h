@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#include <msgpack.h>
+#include "msgpack_c/msgpack.h"
 
 
 typedef id (^MessagePackExtTypeHandler)(int8_t type, const char *data, uint32_t length);

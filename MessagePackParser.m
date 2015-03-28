@@ -6,9 +6,10 @@
 //  Copyright 2011 Digital Five. All rights reserved.
 //
 
-#import <msgpack/object.h>
-#import "MessagePackParser.h"
-#import "MessagePackExtType.h"
+#import  "msgpack_c/msgpack/object.h"
+#include "msgpack_c/msgpack.h"
+#import  "MessagePackParser.h"
+#import  "MessagePackExtType.h"
 
 
 static id unpacked_object(msgpack_object obj, MessagePackExtTypeHandler ext_type_handler) {

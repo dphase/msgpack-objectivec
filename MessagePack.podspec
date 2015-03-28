@@ -14,8 +14,8 @@ Pod::Spec.new do |s|
 
   s.source_files = [
     "*.{h,m}",
-    "msgpack_src/*.{c,h}",
-    "msgpack_src/msgpack/*.h"
+    "msgpack_c/*.{c,h}",
+    "msgpack_c/msgpack/*.h"
   ]
 
   s.requires_arc = true
