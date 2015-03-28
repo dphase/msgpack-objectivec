@@ -18,5 +18,5 @@ Pod::Spec.new do |s|
     "msgpack_src/msgpack/*.h"
   ]
 
-  s.requires_arc = false
+  s.requires_arc = true
 end
