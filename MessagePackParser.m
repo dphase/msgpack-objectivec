@@ -11,6 +11,7 @@
 #import  "MessagePackParser.h"
 #import  "MessagePackExtType.h"
 
+static const int kUnpackerBufferSize = 1024;
 
 static id unpacked_object(msgpack_object obj, MessagePackExtTypeHandler ext_type_handler) {
   switch (obj.type) {
@@ -78,6 +79,44 @@ static id unpacked_object(msgpack_object obj, MessagePackExtTypeHandler ext_type
   msgpack_unpacked_destroy(&msg); // Free the parser
 
   return results;
+}
+
+- (id)init {
+  return [self initWithBufferSize:kUnpackerBufferSize];
+}
+
+- (id)initWithBufferSize:(int)bufferSize {
+  if (self = [super init]) {
+    msgpack_unpacker_init(&unpacker, bufferSize);
+  }
+  return self;
+}
+
+// Feed chunked messagepack data into buffer.
+- (void)feed:(NSData *)chunk {
+  msgpack_unpacker_reserve_buffer(&unpacker, [chunk length]);
+  memcpy(msgpack_unpacker_buffer(&unpacker), [chunk bytes], [chunk length]);
+  msgpack_unpacker_buffer_consumed(&unpacker, [chunk length]);
+}
+
+// Put next parsed messagepack data. If there is not sufficient data, return nil.
+- (id)next {
+  id unpackedObject;
+  MessagePackExtTypeHandler handler = nil;
+  msgpack_unpacked result;
+  msgpack_unpacked_init(&result);
+  if (msgpack_unpacker_next(&unpacker, &result)) {
+    msgpack_object obj = result.data;
+     unpackedObject = unpacked_object(obj, handler); 
+    //unpackedObject = [MessagePackParser createUnpackedObject:obj];
+  }
+  msgpack_unpacked_destroy(&result);
+
+#if !__has_feature(objc_arc)
+    return [unpackedObject autorelease];
+#else
+  return unpackedObject;
+#endif
 }
 
 @end

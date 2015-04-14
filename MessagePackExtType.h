@@ -16,5 +16,6 @@
 @property NSData *data;
 
 - (NSString *)description;
+- (NSUInteger)datatype;
 
 @end

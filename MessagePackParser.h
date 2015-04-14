@@ -20,5 +20,9 @@ typedef id (^MessagePackExtTypeHandler)(int8_t type, const char *data, uint32_t 
 
 + (id)parseData:(NSData *)data;
 + (id)parseData:(NSData *)data withExtTypeHandler:(MessagePackExtTypeHandler)handler;
+- (id)init;
+- (id)initWithBufferSize:(int)bufferSize;
+- (void)feed:(NSData *)rawData;
+- (id)next;
 
 @end

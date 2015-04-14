@@ -6,7 +6,8 @@
 //  Copyright (c) 2011 Digital Five. All rights reserved.
 //
 
-#import "MessagePackPacker.h"
+#import  "MessagePackExtType.h"
+#import  "MessagePackPacker.h"
 #include "msgpack_c/msgpack.h"
 
 
@@ -83,6 +84,12 @@
     msgpack_pack_bin_body(pk, str, (size_t) len);
   } else if ([obj isKindOfClass:[NSNumber class]]) {
     [self packNumber:obj into:pk];
+  } else if ([obj isKindOfClass:[MessagePackExtType class]]) {
+    const char *str = [[obj data] bytes];
+    int len         = [[obj data ] length];
+    
+    msgpack_pack_ext(pk, (size_t)len, [obj datatype]);
+    msgpack_pack_ext_body(pk, str, (size_t)len);
   } else if (obj == [NSNull null]) {
     msgpack_pack_nil(pk);
   } else {
